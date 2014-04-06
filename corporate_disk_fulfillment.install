@@ -1,0 +1,74 @@
+<?php
+
+/**
+ * @file
+ * Installation file for Corporate Disk Fulfillment Module
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function corporate_disk_fulfillment_schema() {
+  $schema['corporate_disk_fulfillment_shipments'] = array(
+    'description' => t('Stores the results returned from disk.com.'),
+    'fields' => array(
+      'order_number' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'description' => 'Order number processed.',
+        'not null' => TRUE,
+        'disp-width' => '11',
+      ),
+      'confirmation' => array(
+        'type' => 'varchar',
+        'description' => 'Confirmation number returned from disk.com.',
+        'length' => '50',
+        'disp-width' => '50',
+        'default' => NULL,
+      ),
+      'tracking_number' => array(
+        'type' => 'varchar',
+        'description' => 'Tracking number from disk.com.',
+        'length' => '50',
+        'disp-width' => '50',
+        'default' => NULL,
+      ),
+      'order_updated' => array(
+        'type' => 'int',
+        'description' => 'Order update field for tracking number updates.',
+        'size' => 'tiny',
+        'default' => 0,
+      ),
+      'service_post' => array(
+        'type' => 'varchar',
+        'description' => 'Post generated and sent to disk.com.',
+        'length' => '500',
+        'disp-width' => '300',
+        'default' => NULL,
+      ),
+      'shipping_service' => array(
+        'type' => 'varchar',
+        'description' => 'Shipping Service Used.',
+        'length' => '150',
+        'disp-width' => '150',
+        'default' => NULL,
+      ),
+      'created_at' => array(
+        'mysql_type' => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
+        'description' => 'The date the record was created.',
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('order_number')
+  );
+  return $schema;
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function corporate_disk_fulfillment_uninstall() {
+  //Delete all variables and drop all tables the clear variables cache.
+  db_drop_table('corporate_disk_fulfillment_shipments');
+  cache_clear_all('variables', 'cache_bootstrap');
+}
