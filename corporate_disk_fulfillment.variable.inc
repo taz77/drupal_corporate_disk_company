@@ -23,6 +23,7 @@ function corporate_disk_fulfillment_variable_info($options) {
     'type' => 'boolean',
     'access' => 'access corporate disk module',
     'group' => 'corporate_disk_fulfillment',
+    'default' => '0', 
   );
   $variable['corporate_disk_fulfillment_requested_by_name'] = array(
     'type' => 'string',

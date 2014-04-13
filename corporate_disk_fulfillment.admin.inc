@@ -13,16 +13,14 @@ function corporate_disk_admin_settings() {
   $form['corporate_disk_fulfillment_intro'] = array(
     '#markup' => 'Options for Corporate Disk Company Fulfillment.',
   );
-  $form['corporate_disk_fulfillment_test_status'] = array(
-    '#title' => t('Enable test mode'),
-    '#description' => t('This will set all the "attention" fields for Disk to "TEST" and thereby no shipments will take place.'),
-    '#type' => 'checkbox',
-    '#default_value' => variable_get('corporate_disk_fulfillment_test_status', 0),
-  );
   $form['corporate_disk_fulfillment_live_status'] = array(
-    '#title' => t('Enable live transactions'),
-    '#description' => t('This will enable the module to send order fulfillment requests to Disk.com'),
-    '#type' => 'checkbox',
+    '#type' => 'radios',
+    '#title' => t('Transaction Type Mode'),
+    '#options' => array(
+      '0' => t('Test Transactions'),
+      '1' => t('Live Transactions'),
+    ),
+    '#description' => t('What mode would you like the transactions to be?'),
     '#default_value' => variable_get('corporate_disk_fulfillment_live_status', 0),
   );
   $form['corporate_disk_fulfillment_companyid'] = array(

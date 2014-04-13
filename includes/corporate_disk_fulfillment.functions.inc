@@ -171,8 +171,8 @@ function corporate_disk_fulfillment_process($caller) {
         $items = rtrim($items, '|');
         $disk_shiptocompany = '';
         $disk_requestedby = variable_get('corporate_disk_fulfillment_requested_by_name', 'cart');
-        $teststatus = variable_get('corporate_disk_fulfillment_test_status', 0);
-        if ($teststatus == 1) {
+        $teststatus = variable_get('corporate_disk_fulfillment_live_status', 0);
+        if ($teststatus == 0) {
           $disk_attention = 'TEST';
         }
         else {
@@ -214,8 +214,8 @@ function corporate_disk_fulfillment_process($caller) {
           // UI Switch to turn live transactions on or off.
           $status = variable_get('corporate_disk_fulfillment_live_status', 0);
           if ($status == 1) {
-            // $response = file_get_contents($url);
-            // $confirmation = filter_xss($response);
+             $response = file_get_contents($url);
+             $confirmation = filter_xss($response);
           }
           else {
             $confirmation = 'TRANS-DISABLED';

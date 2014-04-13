@@ -69,6 +69,14 @@ function corporate_disk_fulfillment_schema() {
  */
 function corporate_disk_fulfillment_uninstall() {
   //Delete all variables and drop all tables the clear variables cache.
+  db_query("DELETE FROM {variable} WHERE name LIKE 'corporate_disk_fulfillment_%'");
   db_drop_table('corporate_disk_fulfillment_shipments');
   cache_clear_all('variables', 'cache_bootstrap');
+}
+
+/**
+ * Implements hook_enable().
+ */
+function corporate_disk_fulfillment_enable() {
+  variable_set('corporate_disk_fulfillment_live_status', 0);
 }
