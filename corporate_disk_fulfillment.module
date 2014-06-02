@@ -158,7 +158,7 @@ function corporate_disk_fulfillment_order_tracking_numbers_view($order) {
   if (count($rows) === 0) {
     $headers = array();
     $row = array(
-      'No tracking information is available at this time or your order had no tracking.',
+      t('No tracking information is available at this time or your order has no tracking.'),
     );
     $rows = array($row);
   }
