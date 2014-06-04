@@ -3,5 +3,5 @@ description = Implements automatic fulfillment with the Corporate Disk Company.
 core = 7.x
 package = Commerce (shipping)
 configure = admin/config/services/corporatedisk
-dependencies[] = commerce_shipping
 dependencies[] = commerce
+dependencies[] = commerce_shipping

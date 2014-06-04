@@ -8,8 +8,8 @@
 /**
  * Implements hook_schema().
  */
-function corporate_disk_fulfillment_schema() {
-  $schema['corporate_disk_fulfillment_shipments'] = array(
+function corporate_disk_company_schema() {
+  $schema['corporate_disk_company_shipments'] = array(
     'description' => t('Stores the results returned from disk.com.'),
     'fields' => array(
       'order_number' => array(
@@ -67,16 +67,35 @@ function corporate_disk_fulfillment_schema() {
 /**
  * Implements hook_uninstall().
  */
-function corporate_disk_fulfillment_uninstall() {
-  //Delete all variables and drop all tables the clear variables cache.
-  db_query("DELETE FROM {variable} WHERE name LIKE 'corporate_disk_fulfillment_%'");
-  db_drop_table('corporate_disk_fulfillment_shipments');
+function corporate_disk_company_uninstall() {
+  // Delete all variables and drop all tables the clear variables cache.
+  $variables = array(
+    'corporate_disk_company_live_status',
+    'corporate_disk_company_companyid',
+    'corporate_disk_company_requested_by_name',
+    'corporate_disk_company_order_view_message_footer',
+    'corporate_disk_company_cron_status',
+    'corporate_disk_company_interval',
+    'corporate_disk_company_backtrack_time',
+    'corporate_disk_company_base_sku_list',
+    'corporate_disk_company_base_sku_substitution_needle',
+    'corporate_disk_company_base_sku_substitution_haystack',
+    'corporate_disk_company_bundle_sku_list',
+    'corporate_disk_company_next_execution',
+  );
+  foreach ($variables as $value) {
+    variable_del($value);
+  }
+  // Special delete for all the shipping services.
+  db_delete('variable')->condition('name', 'corporate_disk_company_shipping_services_%', 'LIKE')->execute();
+  db_query("DELETE FROM {variable} WHERE name LIKE 'corporate_disk_company_%'");
+  db_drop_table('corporate_disk_company_shipments');
   cache_clear_all('variables', 'cache_bootstrap');
 }
 
 /**
  * Implements hook_enable().
  */
-function corporate_disk_fulfillment_enable() {
-  variable_set('corporate_disk_fulfillment_live_status', 0);
+function corporate_disk_company_enable() {
+  variable_set('corporate_disk_company_live_status', 0);
 }

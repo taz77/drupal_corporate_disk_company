@@ -8,7 +8,7 @@
 /**
  * Function to send order to disk.com.
  */
-function corporate_disk_fulfillment_process($caller) {
+function corporate_disk_company_process($caller) {
   // Check to make sure this is not running from some core scans.
   // This eliminates acidental runs of this code that could cause shipments and hence cost money.
   if ($caller != 'cron' && $caller != 'testpage') {
@@ -20,20 +20,20 @@ function corporate_disk_fulfillment_process($caller) {
   foreach ($commerce_shipping_services as $key => $value) {
     $commerce_shipping_service_names[$value['title']] = $key;
   }
-  $disk_shipping_services = variable_get('corporate_disk_fulfillment_shipping_services');
+  $disk_shipping_services = variable_get('corporate_disk_company_shipping_services');
   if (empty($disk_shipping_services)) {
-    watchdog('corporate_disk_fulfillment', '<h2>Configuration</h2><br /><b>You have not configured any shipping services for Disk.com</b>');
+    watchdog('corporate_disk_company', '<h2>Configuration</h2><br /><b>You have not configured any shipping services for Disk.com</b>');
     return FALSE;
   }
-  $shipping_default_conus = variable_get('corporate_disk_fulfillment_shipping_default_conus', '');
-  $shipping_default_oconus = variable_get('corporate_disk_fulfillment_shipping_default_oconus', '');
+  $shipping_default_conus = variable_get('corporate_disk_company_shipping_default_conus', '');
+  $shipping_default_oconus = variable_get('corporate_disk_company_shipping_default_oconus', '');
   if (empty($shipping_default_conus) || empty($shipping_default_oconus)) {
-    watchdog('corporate_disk_fulfillment', '<h2>Configuration</h2><br /><b>You must set a default shipping method for CONUS and OCONUS.</b>');
+    watchdog('corporate_disk_company', '<h2>Configuration</h2><br /><b>You must set a default shipping method for CONUS and OCONUS.</b>');
     return FALSE;
   }
   $diskcom_sku_list = '';
-  $diskcom_base_sku_list = list_extract_allowed_values(variable_get('corporate_disk_fulfillment_base_sku_list'), 'list_text', FALSE);
-  $diskcom_bundles_list = list_extract_allowed_values(variable_get('corporate_disk_fulfillment_bundle_sku_list'), 'list_text', FALSE);
+  $diskcom_base_sku_list = list_extract_allowed_values(variable_get('corporate_disk_company_base_sku_list'), 'list_text', FALSE);
+  $diskcom_bundles_list = list_extract_allowed_values(variable_get('corporate_disk_company_bundle_sku_list'), 'list_text', FALSE);
   foreach ($diskcom_base_sku_list as $key => $value) {
     $diskcom_sku_list .= '\'' . $value . '\', ';
   }
@@ -44,7 +44,7 @@ function corporate_disk_fulfillment_process($caller) {
   }
   // Pull a variable for the backtrack amount, by default we go 24hours.
   $now = time();
-  $startdate = $now - variable_get('corporate_disk_fulfillment_backtrack_time', 86400);
+  $startdate = $now - variable_get('corporate_disk_company_backtrack_time', 86400);
   $diskcom_sku_list = rtrim($diskcom_sku_list, ', ');
   // Query to get customer shipping information.
   $ordersquery = "select distinct a.*
@@ -110,7 +110,7 @@ function corporate_disk_fulfillment_process($caller) {
           ->execute()
           ->fetchAssoc();
         if (!empty($shippingrow)) {
-          $shippingvar = 'corporate_disk_fulfillment_shipping_services_' . $commerce_shipping_service_names[$shippingrow['line_item_label']];
+          $shippingvar = 'corporate_disk_company_shipping_services_' . $commerce_shipping_service_names[$shippingrow['line_item_label']];
           $shippingtype = variable_get($shippingvar, '');
         }
         else {
@@ -141,8 +141,8 @@ function corporate_disk_fulfillment_process($caller) {
           $sku_replacements_bundles = array();
         }
         // Do we have a global SKU replacement?
-        $needle = variable_get('corporate_disk_fulfillment_base_sku_substitution_needle', '');
-        $haystack = variable_get('corporate_disk_fulfillment_base_sku_substitution_haystack', '');
+        $needle = variable_get('corporate_disk_company_base_sku_substitution_needle', '');
+        $haystack = variable_get('corporate_disk_company_base_sku_substitution_haystack', '');
         if ($orderitems_query_result = db_query($orderitemsquery)) {
           foreach ($orderitems_query_result as $orderitems) {
             // Lets walk through the SKUs.
@@ -170,8 +170,8 @@ function corporate_disk_fulfillment_process($caller) {
         }
         $items = rtrim($items, '|');
         $disk_shiptocompany = '';
-        $disk_requestedby = variable_get('corporate_disk_fulfillment_requested_by_name', 'cart');
-        $teststatus = variable_get('corporate_disk_fulfillment_live_status', 0);
+        $disk_requestedby = variable_get('corporate_disk_company_requested_by_name', 'cart');
+        $teststatus = variable_get('corporate_disk_company_live_status', 0);
         if ($teststatus == 0) {
           $disk_attention = 'TEST';
         }
@@ -196,7 +196,7 @@ function corporate_disk_fulfillment_process($caller) {
         $disk_userdef3 = '';
         $disk_ending_string = 'Order%20' . $order->order_number;
         $disk_ending_string .= '&items=' . $items;
-        $disk_ending_string .= '&companyid=' . variable_get('corporate_disk_fulfillment_companyid', '');
+        $disk_ending_string .= '&companyid=' . variable_get('corporate_disk_company_companyid', '');
         $disk_ending_string .= '&shipacct=';
 
         $url = 'https://customers.disk.com/remotepackageship.jsp?os=';
@@ -205,14 +205,14 @@ function corporate_disk_fulfillment_process($caller) {
         $url .= $disk_shippingmethod . '|' . $disk_shippingnumber . '|' . $disk_shippingnotes . '|' . $disk_notes . '|' . $disk_emailaddress . '|' . $disk_userdef1 . '|';
         $url .= $disk_userdef2 . '|' . $disk_userdef3 . '|' . $disk_ending_string;
 
-        $result = db_select('corporate_disk_fulfillment_shipments', 'c')
+        $result = db_select('corporate_disk_company_shipments', 'c')
           ->fields('c')
           ->condition('order_number', $order->order_number, '=')
           ->execute();
         // This is to make certain the orders have not been sent before.
         if ($result->rowCount() == 0) {
           // UI Switch to turn live transactions on or off.
-          $status = variable_get('corporate_disk_fulfillment_live_status', 0);
+          $status = variable_get('corporate_disk_company_live_status', 0);
           if ($status == 1) {
              $response = file_get_contents($url);
              $confirmation = filter_xss($response);
@@ -220,7 +220,7 @@ function corporate_disk_fulfillment_process($caller) {
           else {
             $confirmation = 'TRANS-DISABLED';
           }
-          $queue = db_insert('corporate_disk_fulfillment_shipments')
+          $queue = db_insert('corporate_disk_company_shipments')
             ->fields(array(
               'order_number' => $order->order_number,
               'confirmation' => $confirmation,
@@ -235,7 +235,7 @@ function corporate_disk_fulfillment_process($caller) {
     return TRUE;
   }
   catch (Exception $exc) {
-    watchdog('corporate_disk_fulfillment', '<h2>General Fault</h2><br /><b>Code:</b> @exc', array('@exc' => $exc));
+    watchdog('corporate_disk_company', '<h2>General Fault</h2><br /><b>Code:</b> @exc', array('@exc' => $exc));
     return FALSE;
   }
 }
@@ -243,7 +243,7 @@ function corporate_disk_fulfillment_process($caller) {
 /**
  * Function to update accounts with tracking numbers.
  */
-function corporate_disk_fulfillment_tracking($caller = NULL) {
+function corporate_disk_company_tracking($caller = NULL) {
   if ($caller != 'cron' && $caller != 'testpage') {
     return FALSE;
   }
@@ -251,7 +251,7 @@ function corporate_disk_fulfillment_tracking($caller = NULL) {
   $orders_update = array();
   $responsearray = array();
   // Lets pull orders that need to be updated with tracking numbers.
-  $sql = 'SELECT * from {corporate_disk_fulfillment_shipments} where order_updated = \'0\' and shipping_service NOT LIKE \'%First Class%\'';
+  $sql = 'SELECT * from {corporate_disk_company_shipments} where order_updated = \'0\' and shipping_service NOT LIKE \'USPS First Class\'';
   $result = db_query($sql)
     ->fetchAll();
   // Lets create an array of items that need to be updated.
@@ -261,7 +261,7 @@ function corporate_disk_fulfillment_tracking($caller = NULL) {
       'orderconfirm' => $items->confirmation,
     );
   }
-  $id = variable_get('corporate_disk_fulfillment_companyid', '');
+  $id = variable_get('corporate_disk_company_companyid', '');
   try {
     foreach ($orders as $key => $value) {
       $context = stream_context_create(array('http' => array('header' => 'Accept: application/xml')));
@@ -282,7 +282,7 @@ function corporate_disk_fulfillment_tracking($caller = NULL) {
       }
     }
     foreach ($orders_update as $items) {
-      db_update('corporate_disk_fulfillment_shipments')
+      db_update('corporate_disk_company_shipments')
         ->fields(array(
           'tracking_number' => $items['trackingno'],
           'order_updated' => 1,
@@ -292,17 +292,17 @@ function corporate_disk_fulfillment_tracking($caller = NULL) {
     }
   }
   catch (Exception $e) {
-    watchdog('corporate_disk_fulfillment', '<h2>General Fault</h2><br /><b>Code:</b> @exc', array('@exc' => $exc));
+    watchdog('corporate_disk_company', '<h2>General Fault</h2><br /><b>Code:</b> @exc', array('@exc' => $exc));
     return FALSE;
   }
   // We need to label orders that are First class that there is no tracking
   // @todo If Disk.com changes the names of shipping this code must be updated
   try {
-    $sql = 'SELECT * from {corporate_disk_fulfillment_shipments} where order_updated = \'0\' and shipping_service LIKE \'%First Class%\'';
+    $sql = 'SELECT * from {corporate_disk_company_shipments} where order_updated = \'0\' and shipping_service LIKE \'USPS First Class\'';
     $result = db_query($sql)
       ->fetchAll();
     foreach ($result as $items) {
-      db_update('corporate_disk_fulfillment_shipments')
+      db_update('corporate_disk_company_shipments')
         ->fields(array(
           'tracking_number' => 'Tracking number not supported',
           'order_updated' => 1,
@@ -313,7 +313,7 @@ function corporate_disk_fulfillment_tracking($caller = NULL) {
     return TRUE;
   }
   catch (Exception $e) {
-    watchdog('corporate_disk_fulfillment', '<h2>General Fault</h2><br /><b>Code:</b> @exc', array('@exc' => $exc));
+    watchdog('corporate_disk_company', '<h2>General Fault</h2><br /><b>Code:</b> @exc', array('@exc' => $exc));
     return FALSE;
   }
 }

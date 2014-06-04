@@ -10,10 +10,10 @@
  */
 function corporate_disk_admin_settings() {
   $form = array();
-  $form['corporate_disk_fulfillment_intro'] = array(
+  $form['corporate_disk_company_intro'] = array(
     '#markup' => 'Options for Corporate Disk Company Fulfillment.',
   );
-  $form['corporate_disk_fulfillment_live_status'] = array(
+  $form['corporate_disk_company_live_status'] = array(
     '#type' => 'radios',
     '#title' => t('Transaction Type Mode'),
     '#options' => array(
@@ -21,31 +21,31 @@ function corporate_disk_admin_settings() {
       '1' => t('Live Transactions'),
     ),
     '#description' => t('What mode would you like the transactions to be?'),
-    '#default_value' => variable_get('corporate_disk_fulfillment_live_status', 0),
+    '#default_value' => variable_get('corporate_disk_company_live_status', 0),
   );
-  $form['corporate_disk_fulfillment_companyid'] = array(
+  $form['corporate_disk_company_companyid'] = array(
     '#type' => 'textfield',
     '#title' => t('Company ID'),
     '#description' => t('Disk.com company id number.'),
     '#size' => 5,
-    '#default_value' => variable_get('corporate_disk_fulfillment_companyid'),
+    '#default_value' => variable_get('corporate_disk_company_companyid'),
     '#required' => TRUE,
   );
-  $form['corporate_disk_fulfillment_requested_by_name'] = array(
+  $form['corporate_disk_company_requested_by_name'] = array(
     '#type' => 'textfield',
     '#title' => t('Requested by name'),
     '#description' => t('This is the requested by field in Disk.com order entries.'),
     '#size' => 10,
-    '#default_value' => variable_get('corporate_disk_fulfillment_requested_by_name'),
+    '#default_value' => variable_get('corporate_disk_company_requested_by_name'),
     '#required' => TRUE,
   );
-  $form['corporate_disk_fulfillment_order_view_message_footer'] = array(
+  $form['corporate_disk_company_order_view_message_footer'] = array(
     '#type' => 'textarea',
     '#title' => t('Order View Footer Message'),
     '#description' => t('This message will appear below the display of the tracking numbers in the order view.  You can use HTML in this field for links.'),
     '#rows' => 3,
     '#cols' => 60,
-    '#default_value' => variable_get('corporate_disk_fulfillment_order_view_message_footer'),
+    '#default_value' => variable_get('corporate_disk_company_order_view_message_footer'),
     '#required' => FALSE,
   );
   $form['cron'] = array(
@@ -55,12 +55,12 @@ function corporate_disk_admin_settings() {
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
   );
-  $form['cron']['corporate_disk_fulfillment_cron_status'] = array(
+  $form['cron']['corporate_disk_company_cron_status'] = array(
     '#title' => t('Enable cron to run.'),
     '#type' => 'checkbox',
-    '#default_value' => variable_get('corporate_disk_fulfillment_cron_status', 0),
+    '#default_value' => variable_get('corporate_disk_company_cron_status', 0),
   );
-  $form['cron']['corporate_disk_fulfillment_interval'] = array(
+  $form['cron']['corporate_disk_company_interval'] = array(
     '#title' => t('Cron Interval'),
     '#description' => t('Select the interval for fulfillment to be run.'),
     '#type' => 'select',
@@ -72,9 +72,9 @@ function corporate_disk_admin_settings() {
       43200 => t('12 hours'),
       86400 => t('24 hours'),
     ),
-    '#default_value' => variable_get('corporate_disk_fulfillment_interval', array()),
+    '#default_value' => variable_get('corporate_disk_company_interval', array()),
   );
-  $form['cron']['corporate_disk_fulfillment_backtrack_time'] = array(
+  $form['cron']['corporate_disk_company_backtrack_time'] = array(
     '#title' => t('Backtrack Interval'),
     '#description' => t('Select the amount of time to backtrack on the order query that pulls in the disk orders.'),
     '#type' => 'select',
@@ -85,7 +85,7 @@ function corporate_disk_admin_settings() {
       345600 => t('96 hours'),
       604800 => t('1 week'),
     ),
-    '#default_value' => variable_get('corporate_disk_fulfillment_backtrack_time', array()),
+    '#default_value' => variable_get('corporate_disk_company_backtrack_time', array()),
   );
   $form['sku'] = array(
     '#type' => 'fieldset',
@@ -98,11 +98,11 @@ function corporate_disk_admin_settings() {
     '#markup' => t('This is a very imporant area of this module.  If you have questions please refer to your system adminstrator before proceeding.'),
     '#weight' => 0,
   );
-  $form['sku']['corporate_disk_fulfillment_base_sku_list'] = array(
+  $form['sku']['corporate_disk_company_base_sku_list'] = array(
     '#title' => t('Baseline SKU List'),
     '#type' => 'textarea',
     '#description' => t('This is a Key Value pair list of the baseline product SKUs.  The keys are integer values. The values are the SKU.  These values must match what is stored in Disk.com.  <br />An example would be: 07|106-2'),
-    '#default_value' => variable_get('corporate_disk_fulfillment_base_sku_list', ''),
+    '#default_value' => variable_get('corporate_disk_company_base_sku_list', ''),
     '#rows' => 10,
     '#cols' => 60,
     '#weight' => 2,
@@ -119,27 +119,27 @@ function corporate_disk_admin_settings() {
     '#markup' => t('<strong>PROCEED WITH CAUTION</strong><br />These are optional fields for doing a direct substitution on SKUs to get to the base SKU.  <strong>This is a global substitution that will apply to all SKUs processed.</strong> For instance we are running -8 that resolve to a -2 for all SKUs.'),
     '#weight' => 0,
   );
-  $form['sku']['substitution']['corporate_disk_fulfillment_base_sku_substitution_needle'] = array(
+  $form['sku']['substitution']['corporate_disk_company_base_sku_substitution_needle'] = array(
     '#title' => t('Substitution Search'),
     '#type' => 'textfield',
     '#description' => t('If we are running a substitution suffix.  What is the suffix we are looking for.  The needle in a string search'),
-    '#default_value' => variable_get('corporate_disk_fulfillment_base_sku_substitution_needle', ''),
+    '#default_value' => variable_get('corporate_disk_company_base_sku_substitution_needle', ''),
     '#size' => 10,
     '#resizable' => TRUE,
   );
-  $form['sku']['substitution']['corporate_disk_fulfillment_base_sku_substitution_haystack'] = array(
+  $form['sku']['substitution']['corporate_disk_company_base_sku_substitution_haystack'] = array(
     '#title' => t('Substitution Replacement'),
     '#type' => 'textfield',
     '#description' => t('What is our substitution.  <strong>This must match the patterns in the <i>Baseline SKU List</i> above or you will break this module!</strong>'),
-    '#default_value' => variable_get('corporate_disk_fulfillment_base_sku_substitution_haystack', ''),
+    '#default_value' => variable_get('corporate_disk_company_base_sku_substitution_haystack', ''),
     '#size' => 10,
     '#resizable' => TRUE,
   );
-  $form['sku']['corporate_disk_fulfillment_bundle_sku_list'] = array(
+  $form['sku']['corporate_disk_company_bundle_sku_list'] = array(
     '#title' => t('Bundled SKU List'),
     '#type' => 'textarea',
     '#description' => t('<b>These are processed before substitutions and hence you must manual translate the substitution here!</b><br />This is a Key Value pair list of the <b>BUNDLED</b> product SKUs.  The keys are bundle SKU. The values are the base SKUs the bundle represents delimitered by spaces.  <b>The values must match the baseline SKUs that are stored on Disk.com listed above!</b>  An example would be: <br /> 502-2|106-2 200-2'),
-    '#default_value' => variable_get('corporate_disk_fulfillment_bundle_sku_list', ''),
+    '#default_value' => variable_get('corporate_disk_company_bundle_sku_list', ''),
     '#rows' => 10,
     '#cols' => 60,
     '#weight' => 10,
@@ -153,11 +153,11 @@ function corporate_disk_admin_settings() {
  */
 function corporate_disk_admin_settings_shipping() {
   $form = array();
-  $form['corporate_disk_fulfillment_shipping_services'] = array(
+  $form['corporate_disk_company_shipping_services'] = array(
     '#title' => t('Available shipping methods'),
     '#type' => 'textarea',
     '#description' => t('<b>This is list of the available shipping methods offered at Disk.com as they exist in their API.</b><br /><b>These must match the Disk.com API names exactly</b><br />One per line.'),
-    '#default_value' => variable_get('corporate_disk_fulfillment_shipping_services', ''),
+    '#default_value' => variable_get('corporate_disk_company_shipping_services', ''),
     '#rows' => 30,
     '#cols' => 40,
     '#weight' => 10,
@@ -170,34 +170,34 @@ function corporate_disk_admin_settings_shipping() {
  */
 function corporate_disk_admin_settings_shipping_configuration() {
   $commerce_shipping_services = commerce_shipping_services();
-  $values = variable_get('corporate_disk_fulfillment_shipping_services');
+  $values = variable_get('corporate_disk_company_shipping_services');
   $form = array();
   if ($values == '') {
     $shipping_services = array('EMPTY LIST');
-    $form['corporate_disk_fulfillment_shipping_services_notice'] = array(
+    $form['corporate_disk_company_shipping_services_notice'] = array(
       '#markup' => t('You have not added any') . ' ' . l('shipping services', 'admin/config/services/corporatedisk/shippingservices') . ' ' . t('for Corporate Disk Company.'),
       '#weight' => 0,
     );
     return system_settings_form($form);
   }
   else {
-    $shipping_services = list_extract_allowed_values(variable_get('corporate_disk_fulfillment_shipping_services', "EMPTY LIST\nend"), 'list_text', FALSE);
+    $shipping_services = list_extract_allowed_values(variable_get('corporate_disk_company_shipping_services', "EMPTY LIST\nend"), 'list_text', FALSE);
   }
-  $form['corporate_disk_fulfillment_shipping_services_intro'] = array(
+  $form['corporate_disk_company_shipping_services_intro'] = array(
     '#markup' => t('Setup default shipping services and match available Disk.com services to Drupal Commerce shipping services.'),
   );
-  $form['corporate_disk_fulfillment_shipping_default_conus'] = array(
+  $form['corporate_disk_company_shipping_default_conus'] = array(
     '#title' => t('Default Continental United States Shipping'),
     '#description' => t('Shipping method to use when none is specified as a line item in the order. Continental United States.'),
-    '#default_value' => variable_get('corporate_disk_fulfillment_shipping_default_conus', ''),
+    '#default_value' => variable_get('corporate_disk_company_shipping_default_conus', ''),
     '#type' => 'select',
     '#options' => $shipping_services,
     '#weight' => 0,
   );
-  $form['corporate_disk_fulfillment_shipping_default_oconus'] = array(
+  $form['corporate_disk_company_shipping_default_oconus'] = array(
     '#title' => t('Default International Shipping'),
     '#description' => t('Shipping method to use when none is specified as a line item in the order. Outside Continental United States.'),
-    '#default_value' => variable_get('corporate_disk_fulfillment_shipping_default_oconus', ''),
+    '#default_value' => variable_get('corporate_disk_company_shipping_default_oconus', ''),
     '#type' => 'select',
     '#options' => $shipping_services,
     '#weight' => 3,
@@ -210,17 +210,17 @@ function corporate_disk_admin_settings_shipping_configuration() {
       '#description' => t('Match the Drupal Commerce shipping services to the appropriate Disk.com shipping service.')
     );
     foreach ($commerce_shipping_services AS $key => $value) {
-      $form['services']['corporate_disk_fulfillment_shipping_services_' . $key] = array(
+      $form['services']['corporate_disk_company_shipping_services_' . $key] = array(
         '#title' => t('Drupal Commerce:') . ' ' . $value['display_title'],
         '#description' => t('Shipping method to use for Commerce Shipping' . ' ' . $value['display_title']),
-        '#default_value' => variable_get('corporate_disk_fulfillment_shipping_services_' . $key, ''),
+        '#default_value' => variable_get('corporate_disk_company_shipping_services_' . $key, ''),
         '#type' => 'select',
         '#options' => $shipping_services,
       );
     }
   }
   else {
-    $form['corporate_disk_fulfillment_shipping_services_notice'] = array(
+    $form['corporate_disk_company_shipping_services_notice'] = array(
       '#markup' => t('You have no shipping services defined in Drupal Commerce.  Once you add a shipping service module this area will populate with mappings that must be configured.'),
       '#weight' => 50,
     );

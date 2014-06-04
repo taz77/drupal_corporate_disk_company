@@ -8,7 +8,7 @@
 /**
  * Page for base listing of all orders ordered by created at descending.
  */
-function corporate_disk_fulfillment_basicpage() {
+function corporate_disk_company_basicpage() {
   $rows = array();
   $results = db_query("select order_number, confirmation, created_at from reporting_diskcom_shipments order by created_at desc");
   foreach ($results as $node) {
@@ -34,7 +34,7 @@ function corporate_disk_testpage() {
   $orders_update = array();
   $responsearray = array();
   // Lets pull orders that need to be updated with tracking numbers.
-  $sql = 'SELECT * from {corporate_disk_fulfillment_shipments} where order_updated = \'0\' and shipping_service NOT LIKE \'%First Class%\'';
+  $sql = 'SELECT * from {corporate_disk_company_shipments} where order_updated = \'0\' and shipping_service NOT LIKE \'%First Class%\'';
   $result = db_query($sql)
     ->fetchAll();
   // Lets create an array of items that need to be updated.
@@ -44,7 +44,7 @@ function corporate_disk_testpage() {
       'orderconfirm' => $items->confirmation,
     );
   }
-  $id = variable_get('corporate_disk_fulfillment_companyid', '');
+  $id = variable_get('corporate_disk_company_companyid', '');
   foreach ($orders as $key => $value) {
     $context = stream_context_create(array('http' => array('header' => 'Accept: application/xml')));
     $url = 'https://customers.disk.com/shippinginfo.jsp?cid=' . $id . '&packageshipmentid=' . $value['orderconfirm'];
@@ -64,7 +64,7 @@ function corporate_disk_testpage() {
     }
   }
   foreach ($orders_update as $items) {
-    db_update('corporate_disk_fulfillment_shipments')
+    db_update('corporate_disk_company_shipments')
       ->fields(array(
         'tracking_number' => $items['trackingno'],
         'order_updated' => 1,
@@ -85,7 +85,7 @@ function corporate_disk_testpage() {
     $p = explode('|', $items->service_post);
     $service = urldecode($p[11]);
 
-    $queue = db_insert('corporate_disk_fulfillment_shipments')
+    $queue = db_insert('corporate_disk_company_shipments')
     ->fields(array(
     'order_number' => $items->order_number,
     'confirmation' => $items->confirmation,
@@ -97,7 +97,7 @@ function corporate_disk_testpage() {
     }
    */
   /*
-    if (corporate_disk_fulfillment_process('testpage')) {
+    if (corporate_disk_company_process('testpage')) {
     $page = array(
     'intro' => array('#markup' => 'hello'),
     );
@@ -112,12 +112,12 @@ function corporate_disk_testpage() {
     foreach ($commerce_shipping_services as $key => $value) {
     $commerce_shipping_service_names[$value['title']] = $key;
     }
-    $disk_shipping_services = variable_get('corporate_disk_fulfillment_shipping_services');
+    $disk_shipping_services = variable_get('corporate_disk_company_shipping_services');
     //firep($commerce_shipping_service_names, 'Shipping names reversal');
     //firep($disk_shipping_services, 'Disk shipping services');
     firep($shippingrow, 'order shipping');
 
-    $shippingvar = 'corporate_disk_fulfillment_shipping_services_' . $commerce_shipping_service_names[$shippingrow['line_item_label']];
+    $shippingvar = 'corporate_disk_company_shipping_services_' . $commerce_shipping_service_names[$shippingrow['line_item_label']];
     firep($shippingvar, 'shipping var');
     $shippingmethod = variable_get($shippingvar);
     firep($shippingmethod, 'pullled shipping method');
