@@ -215,7 +215,8 @@ function corporate_disk_company_process($caller) {
           $status = variable_get('corporate_disk_company_live_status', 0);
           if ($status == 1) {
              $response = file_get_contents($url);
-             $confirmation = filter_xss($response);
+             $confirmation = trim(filter_xss($response));
+             unset($response);
           }
           else {
             $confirmation = 'TRANS-DISABLED';
@@ -226,6 +227,7 @@ function corporate_disk_company_process($caller) {
               'confirmation' => $confirmation,
               'service_post' => $url,
               'shipping_service' => $shippingtype,
+              'created_at' => REQUEST_TIME,
             ))
             ->execute();
         }
@@ -244,16 +246,27 @@ function corporate_disk_company_process($caller) {
  * Function to update accounts with tracking numbers.
  */
 function corporate_disk_company_tracking($caller = NULL) {
+  // We only want cron to be able to call this or our testing page.
   if ($caller != 'cron' && $caller != 'testpage') {
     return FALSE;
   }
+  // Lets pull orders that need to be updated with tracking numbers.
+  // $sql = 'SELECT * from {corporate_disk_company_shipments} where order_updated = \'0\' and shipping_service NOT LIKE \'USPS First Class\'';
+  $query = db_select('corporate_disk_company_shipments', 'c')
+    ->field('c')
+    ->condition('order_updated', '0', '=')
+    ->condition('shipping_service', 'USPS First Class', 'NOT LIKE');
+  // Count the results before we get too into processing.
+  $count = $query->countQuery()->execute()->fetchField();
+  if ($count == 0){
+    // Stop processing if there are no orders to update.
+    return TRUE;
+  }
+  // Execute query if we are good to go.
+  $result = $query->execute();
   $orders = array();
   $orders_update = array();
   $responsearray = array();
-  // Lets pull orders that need to be updated with tracking numbers.
-  $sql = 'SELECT * from {corporate_disk_company_shipments} where order_updated = \'0\' and shipping_service NOT LIKE \'USPS First Class\'';
-  $result = db_query($sql)
-    ->fetchAll();
   // Lets create an array of items that need to be updated.
   foreach ($result as $items) {
     $orders[] = array(
@@ -265,7 +278,7 @@ function corporate_disk_company_tracking($caller = NULL) {
   try {
     foreach ($orders as $key => $value) {
       $context = stream_context_create(array('http' => array('header' => 'Accept: application/xml')));
-      $url = 'https://customers.disk.com/shippinginfo.jsp?cid=' . $id . '&packageshipmentid=' . $value['orderconfirm'];
+      $url = 'https://customers.disk.com/shippinginfo.jsp?cid=' . $id . '&packageshipmentid=' . trim($value['orderconfirm']);
       $response = file_get_contents($url, false, $context);
       $response = simplexml_load_string($response);
       $vars = get_object_vars($response);
