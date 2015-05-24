@@ -165,3 +165,25 @@ function corporate_disk_company_order_tracking_numbers_view($order) {
   $output = theme('table', array('header' => $headers, 'rows' => $rows));
   return $output;
 }
+
+/**
+ * Implements hook_entity_info().
+ */
+function corporate_disk_company_entity_info() {
+  $return = array(
+    'corporate_disk_company_shipment' => array(
+      'label' => t('Corporate Disk Company Shipment'),
+      'entity class' => 'CorporateDiskCompanyShipment',
+      'controller class' => 'EntityAPIController',
+      'views controller class' => 'EntityDefaultViewsController',
+      'module' => 'corporate_disk_company',
+      'base table' => 'corporate_disk_company_shipments',
+      'fieldable' => TRUE,
+      'entity keys' => array(
+        'id' => 'order_number',
+      ),
+    ),
+  );
+
+  return $return;
+}
