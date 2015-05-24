@@ -54,9 +54,10 @@ function corporate_disk_company_schema() {
         'default' => NULL,
       ),
       'created_at' => array(
-        'mysql_type' => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
+        'type' => 'int',
         'description' => 'The date the record was created.',
         'not null' => TRUE,
+        'default' => 0,
       ),
     ),
     'primary key' => array('order_number')
@@ -98,4 +99,50 @@ function corporate_disk_company_uninstall() {
  */
 function corporate_disk_company_enable() {
   variable_set('corporate_disk_company_live_status', 0);
+}
+
+/**
+ * Alter the table for shipments to use an integer for created_at and migrate the data.
+ *
+ */
+function corporate_disk_company_update_7200() {
+  // Select all the data from the table to store in memory to migrate
+  $sql = 'select order_number, created_at from {corporate_disk_company_shipments}';
+  try {
+    $backup = array();
+    if ($corporate_disk_result = db_query($sql)) {
+      foreach ($corporate_disk_result as $order) {
+        $backup[$order->order_number] = $order->created_at;
+      }
+    }
+  }
+  catch (Exception $exc) {
+    watchdog('corporate_disk_company', '<h2>General Fault during update</h2><br /><b>Code:</b> @exc', array('@exc' => $exc));
+    return FALSE;
+  }
+
+  try {
+    // Drop the created field.
+    db_drop_field('corporate_disk_company_shipments', 'created_at');
+    // Add the field back to the table.
+    $spec = array(
+      'description' => 'Date the order and shipping was created.',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    );
+    db_add_field('corporate_disk_company_shipments', 'created_at', $spec);
+
+    foreach ($backup as $key => $item) {
+      $new_timestamp = strtotime($item);
+      db_update('corporate_disk_company_shipments')
+        ->fields(array('created_at' => $new_timestamp))
+        ->condition('order_number', $key, '=')
+        ->execute();
+    }
+  }
+  catch (Exception $exc) {
+    watchdog('corporate_disk_company', '<h2>General Fault during update</h2><br /><b>Code:</b> @exc', array('@exc' => $exc));
+    return FALSE;
+  }
 }
