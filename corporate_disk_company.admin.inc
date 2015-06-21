@@ -8,7 +8,7 @@
 /**
  * Form definition; admin settings.
  */
-function corporate_disk_admin_settings() {
+function corporate_disk_admin_settings($form, &$form_state) {
   $form = array();
   $form['corporate_disk_company_intro'] = array(
     '#markup' => 'Options for Corporate Disk Company Fulfillment.',
@@ -22,7 +22,35 @@ function corporate_disk_admin_settings() {
     ),
     '#description' => t('What mode would you like the transactions to be?'),
     '#default_value' => variable_get('corporate_disk_company_live_status', 0),
+    '#ajax' => array(
+      'callback' => 'corporate_disk_company_live_testing',
+      'wrapper' => 'corporate-disk-company-ajax-wrapper',
+      'method' => 'replace',
+      'effect' => 'fade',
+    ),
   );
+  $form['corporate_disk_company_live_test'] = array(
+    '#prefix' => '<div id="corporate-disk-company-ajax-wrapper">',
+    '#suffix' => '</div>',
+  );
+  $live_test_value = variable_get('corporate_disk_company_live_status', 0);
+  if ((isset($form_state['values']['corporate_disk_company_live_status']) && $form_state['values']['corporate_disk_company_live_status'] > 0) || $live_test_value == 1) {
+    $form['corporate_disk_company_live_test'] = array(
+      '#prefix' => '<div id="corporate-disk-company-ajax-wrapper">',
+      '#suffix' => '</div>',
+      '#title' => t('Test your live transaction.'),
+      '#type' => 'checkbox',
+      '#description' => t('You can submit information to Disk.com that will not be processed. This sets the "attention" field to "TEST".'),
+      '#default_value' => variable_get('corporate_disk_company_live_test', 0),
+    );
+  }
+
+  if (isset($form_state['values']['corporate_disk_company_live_status']) && $form_state['values']['corporate_disk_company_live_status'] == 0) {
+    $form['corporate_disk_company_live_test'] = array(
+      '#prefix' => '<div id="corporate-disk-company-ajax-wrapper">',
+      '#suffix' => '</div>',
+    );
+  }
   $form['corporate_disk_company_companyid'] = array(
     '#type' => 'textfield',
     '#title' => t('Company ID'),
@@ -151,7 +179,7 @@ function corporate_disk_admin_settings() {
 /**
  * Form definition; admin settings shipping services.
  */
-function corporate_disk_admin_settings_shipping() {
+function corporate_disk_admin_settings_shipping($form, &$form_state) {
   $form = array();
   $form['corporate_disk_company_shipping_services'] = array(
     '#title' => t('Available shipping methods'),
@@ -168,7 +196,7 @@ function corporate_disk_admin_settings_shipping() {
 /**
  * Form definition; admin settings shipping services configuration.
  */
-function corporate_disk_admin_settings_shipping_configuration() {
+function corporate_disk_admin_settings_shipping_configuration($form, &$form_state) {
   $commerce_shipping_services = commerce_shipping_services();
   $values = variable_get('corporate_disk_company_shipping_services');
   $form = array();
@@ -226,4 +254,62 @@ function corporate_disk_admin_settings_shipping_configuration() {
     );
   }
   return system_settings_form($form);
+}
+
+/**
+ * AJAX callback to ask for testing under live conditions
+ */
+function corporate_disk_company_live_testing($form, $form_state) {
+  return $form['corporate_disk_company_live_test'];
+}
+
+/**
+ * Page to list failed transactions to Disk.com
+ */
+function corporate_disk_company_failed_orders() {
+  $results = db_select('corporate_disk_company_shipments', 'c')
+      ->fields('c')
+      ->condition('confirmation', 'DISK', 'NOT LIKE')
+      ->execute();
+  $count = $results->rowCount();
+  if ($count == 0) {
+    // Stop processing no issues.
+    $page = array(
+      'intro' => array(
+        '#markup' => t('There are no orders present with any issues.'),
+      ),
+    );
+    return $page;
+  }
+  else {
+    $rows = array();
+    foreach ($results as $node) {
+      $rows[] = array($node->order_number,
+        $node->confirmation,
+        $node->created_at,
+      );
+    }
+    $inforows[] = array(
+      'DISK-RETRY',
+      t('cURL returned a 404 or not found. This is a connection problem.'),
+    );
+    $inforows[] = array(
+      'DISK-FAILURE-cURL-ERROR-NUMBER-X',
+      t('Refer to the php cURL Documentation for error number. X is the error number'),
+    );
+    $page = array(
+      'informaton' => array(
+        '#theme' => 'table',
+        '#header' => array(t('Error'), t('Description')),
+        '#rows' => $inforows,
+      ),
+      'datatable' => array(
+        '#theme' => 'table',
+        '#header' => array(t('Order Number'), t('Confirmation'), t('Created At')),
+        '#rows' => $rows,
+        '#empty' => t('No entries. Something went wrong.'),
+      ),
+    );
+    return $page;
+  }
 }

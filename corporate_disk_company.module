@@ -40,23 +40,21 @@ function corporate_disk_company_module_access() {
 function corporate_disk_company_menu() {
   $items = array();
   $items['admin/config/services/corporatedisk'] = array(
-    'title' => 'Corporate Disk Fulfillment Service',
-    'description' => 'Configure Disk.com integration.',
+    'title' => t('Corporate Disk Fulfillment Service'),
+    'description' => t('Configure Disk.com integration.'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('corporate_disk_admin_settings'),
     'access callback' => 'corporate_disk_company_module_access',
-    // 'type' => MENU_NORMAL_ITEM,
-    //'type' => MENU_DEFAULT_LOCAL_TASK,
     'file' => 'corporate_disk_company.admin.inc',
   );
   $items['admin/config/services/corporatedisk/default'] = array(
-    'title' => 'Corporate Disk Fulfillment',
+    'title' => t('Corporate Disk Fulfillment'),
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => 0,
   );
   $items['admin/config/services/corporatedisk/shippingservices'] = array(
-    'title' => 'Available Shipping Services',
-    'description' => 'Configure Disk.com shipping services.',
+    'title' => t('Available Shipping Services'),
+    'description' => t('Configure Disk.com shipping services.'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('corporate_disk_admin_settings_shipping'),
     'access callback' => 'corporate_disk_company_module_access',
@@ -65,8 +63,8 @@ function corporate_disk_company_menu() {
     'file' => 'corporate_disk_company.admin.inc',
   );
   $items['admin/config/services/corporatedisk/shippingservicesconfig'] = array(
-    'title' => 'Shipping Configuration for Cart',
-    'description' => 'Configure Disk.com shipping services.',
+    'title' => t('Shipping Configuration for Cart'),
+    'description' => t('Configure Disk.com shipping services.'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('corporate_disk_admin_settings_shipping_configuration'),
     'access callback' => 'corporate_disk_company_module_access',
@@ -74,14 +72,14 @@ function corporate_disk_company_menu() {
     'weight' => 10,
     'file' => 'corporate_disk_company.admin.inc',
   );
-  $items['corporatedisk/test'] = array(
-    'title' => 'Corporate Disk Fulfillment Test Page',
-    'description' => 'Test page',
-    'page callback' => 'corporate_disk_testpage',
+  $items['admin/config/services/corporatedisk/failures'] = array(
+    'title' => t('Failures'),
+    'description' => t('Orders that failed to be processed.'),
+    'page arguments' => array('corporate_disk_company_failed_orders'),
     'access callback' => 'corporate_disk_company_module_access',
-    'type' => MENU_NORMAL_ITEM,
-    'weight' => 5,
-    'file' => 'includes/corporate_disk_company.pages.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 15,
+    'file' => 'corporate_disk_company.admin.inc',
   );
   return $items;
 }
@@ -102,6 +100,7 @@ function corporate_disk_company_cron() {
     if (time() >= variable_get('corporate_disk_company_next_execution', 0)) {
       //Lets process existing orders for fulfillment.
       corporate_disk_company_process('cron');
+      corporate_disk_company_scrap_failures('cron');
       corporate_disk_company_tracking('cron');
       watchdog('corporate_disk_company', 'Corporate Disk Cron Ran');
       variable_set('corporate_disk_company_next_execution', time() + $interval);
@@ -141,7 +140,7 @@ function corporate_disk_company_order_tracking_numbers_view($order) {
   // Pull tracking information basedon the order id
   $sql = 'SELECT * from {corporate_disk_company_shipments} where order_updated = \'1\' and order_number = ' . $order->order_id;
   $result = db_query($sql)
-    ->fetchAll();
+      ->fetchAll();
   // Lets create an array of items that need to be updated.
   $rows = array();
   $headers = array(
