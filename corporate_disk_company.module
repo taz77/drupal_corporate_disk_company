@@ -133,14 +133,14 @@ function corporate_disk_company_entity_view($entity, $entity_type, $view_mode, $
 
 /**
  * Helper function to build html to show tracking numbers on orders
- * @param type $order
- * @return type
+ * @param object $order
+ * @return $output
  */
 function corporate_disk_company_order_tracking_numbers_view($order) {
   // Pull tracking information basedon the order id
   $sql = 'SELECT * from {corporate_disk_company_shipments} where order_updated = \'1\' and order_number = ' . $order->order_id;
   $result = db_query($sql)
-      ->fetchAll();
+    ->fetchAll();
   // Lets create an array of items that need to be updated.
   $rows = array();
   $headers = array(
@@ -186,3 +186,4 @@ function corporate_disk_company_entity_info() {
 
   return $return;
 }
+
