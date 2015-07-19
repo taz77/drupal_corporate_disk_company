@@ -269,7 +269,7 @@ function corporate_disk_company_live_testing($form, $form_state) {
 function corporate_disk_company_failed_orders() {
   $results = db_select('corporate_disk_company_shipments', 'c')
       ->fields('c')
-      ->condition('confirmation', 'DISK', 'NOT LIKE')
+      ->condition('confirmation', 'DISK', 'LIKE')
       ->execute();
   $count = $results->rowCount();
   if ($count == 0) {

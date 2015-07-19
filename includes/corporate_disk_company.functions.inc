@@ -282,6 +282,7 @@ function corporate_disk_company_process($caller) {
  * Function to update accounts with tracking numbers.
  */
 function corporate_disk_company_tracking($caller = NULL) {
+  // We only want cron to be able to call this or our testing page.
   if ($caller != 'cron' && $caller != 'testpage') {
     return FALSE;
   }
