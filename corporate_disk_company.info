@@ -5,3 +5,4 @@ package = Commerce (shipping)
 configure = admin/config/services/corporatedisk
 dependencies[] = commerce
 dependencies[] = commerce_shipping
+dependencies[] = list
