@@ -232,6 +232,9 @@ function corporate_disk_company_process($caller) {
               case '7':
                 $confirmation = 'DISK-RETRY';
                 break;
+              case '28':
+                $confirmation = 'DISK-RETRY';
+                break;
               default:
                 $confirmation = 'DISK-FAILURE-cURL-ERROR-NUMBER-' . $disk_error_number;
                 break;
