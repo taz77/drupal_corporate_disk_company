@@ -398,7 +398,7 @@ function corporate_disk_company_scrap_failures($caller = NULL) {
     ->execute();
   $count = $results->rowCount();
   if ($count < 1) {
-    //Stop we have nothing to do
+    // Stop we have nothing to do.
     return TRUE;
   }
   else {
