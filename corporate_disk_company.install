@@ -9,59 +9,59 @@
  * Implements hook_schema().
  */
 function corporate_disk_company_schema() {
-  $schema['corporate_disk_company_shipments'] = array(
+  $schema['corporate_disk_company_shipments'] = [
     'description' => t('Stores the results returned from disk.com.'),
-    'fields' => array(
-      'order_number' => array(
+    'fields' => [
+      'order_number' => [
         'type' => 'int',
         'unsigned' => TRUE,
         'description' => 'Order number processed.',
         'not null' => TRUE,
         'disp-width' => '11',
-      ),
-      'confirmation' => array(
+      ],
+      'confirmation' => [
         'type' => 'varchar',
         'description' => 'Confirmation number returned from disk.com.',
         'length' => '50',
         'disp-width' => '50',
         'default' => NULL,
-      ),
-      'tracking_number' => array(
+      ],
+      'tracking_number' => [
         'type' => 'varchar',
         'description' => 'Tracking number from disk.com.',
         'length' => '50',
         'disp-width' => '50',
         'default' => NULL,
-      ),
-      'order_updated' => array(
+      ],
+      'order_updated' => [
         'type' => 'int',
         'description' => 'Order update field for tracking number updates.',
         'size' => 'tiny',
         'default' => 0,
-      ),
-      'service_post' => array(
+      ],
+      'service_post' => [
         'type' => 'varchar',
         'description' => 'Post generated and sent to disk.com.',
         'length' => '500',
         'disp-width' => '300',
         'default' => NULL,
-      ),
-      'shipping_service' => array(
+      ],
+      'shipping_service' => [
         'type' => 'varchar',
         'description' => 'Shipping Service Used.',
         'length' => '150',
         'disp-width' => '150',
         'default' => NULL,
-      ),
-      'created_at' => array(
+      ],
+      'created_at' => [
         'type' => 'int',
         'description' => 'The date the record was created.',
         'not null' => TRUE,
         'default' => 0,
-      ),
-    ),
-    'primary key' => array('order_number')
-  );
+      ],
+    ],
+    'primary key' => ['order_number'],
+  ];
   return $schema;
 }
 
@@ -70,7 +70,7 @@ function corporate_disk_company_schema() {
  */
 function corporate_disk_company_uninstall() {
   // Delete all variables and drop all tables the clear variables cache.
-  $variables = array(
+  $variables = [
     'corporate_disk_company_live_status',
     'corporate_disk_company_companyid',
     'corporate_disk_company_requested_by_name',
@@ -83,12 +83,14 @@ function corporate_disk_company_uninstall() {
     'corporate_disk_company_base_sku_substitution_haystack',
     'corporate_disk_company_bundle_sku_list',
     'corporate_disk_company_next_execution',
-  );
+  ];
   foreach ($variables as $value) {
     variable_del($value);
   }
   // Special delete for all the shipping services.
-  db_delete('variable')->condition('name', 'corporate_disk_company_shipping_services_%', 'LIKE')->execute();
+  db_delete('variable')
+    ->condition('name', 'corporate_disk_company_shipping_services_%', 'LIKE')
+    ->execute();
   db_query("DELETE FROM {variable} WHERE name LIKE 'corporate_disk_company_%'");
   db_drop_table('corporate_disk_company_shipments');
   cache_clear_all('variables', 'cache_bootstrap');
@@ -102,14 +104,15 @@ function corporate_disk_company_enable() {
 }
 
 /**
- * Alter the table for shipments to use an integer for created_at and migrate the data.
+ * Alter the table for shipments to use an integer for created_at and migrate
+ * the data.
  *
  */
 function corporate_disk_company_update_7200() {
   // Select all the data from the table to store in memory to migrate
   $sql = 'select order_number, created_at from {corporate_disk_company_shipments}';
   try {
-    $backup = array();
+    $backup = [];
     if ($corporate_disk_result = db_query($sql)) {
       foreach ($corporate_disk_result as $order) {
         $backup[$order->order_number] = $order->created_at;
@@ -117,7 +120,7 @@ function corporate_disk_company_update_7200() {
     }
   }
   catch (Exception $exc) {
-    watchdog('corporate_disk_company', '<h2>General Fault during update</h2><br /><b>Code:</b> @exc', array('@exc' => $exc));
+    watchdog('corporate_disk_company', '<h2>General Fault during update</h2><br /><b>Code:</b> @exc', ['@exc' => $exc]);
     return FALSE;
   }
 
@@ -125,24 +128,24 @@ function corporate_disk_company_update_7200() {
     // Drop the created field.
     db_drop_field('corporate_disk_company_shipments', 'created_at');
     // Add the field back to the table.
-    $spec = array(
+    $spec = [
       'description' => 'Date the order and shipping was created.',
       'type' => 'int',
       'not null' => TRUE,
       'default' => 0,
-    );
+    ];
     db_add_field('corporate_disk_company_shipments', 'created_at', $spec);
 
     foreach ($backup as $key => $item) {
       $new_timestamp = strtotime($item);
       db_update('corporate_disk_company_shipments')
-        ->fields(array('created_at' => $new_timestamp))
+        ->fields(['created_at' => $new_timestamp])
         ->condition('order_number', $key, '=')
         ->execute();
     }
   }
   catch (Exception $exc) {
-    watchdog('corporate_disk_company', '<h2>General Fault during update</h2><br /><b>Code:</b> @exc', array('@exc' => $exc));
+    watchdog('corporate_disk_company', '<h2>General Fault during update</h2><br /><b>Code:</b> @exc', ['@exc' => $exc]);
     return FALSE;
   }
 }

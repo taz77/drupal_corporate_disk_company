@@ -11,12 +11,12 @@ module_load_include('inc', 'corporate_disk_company', 'includes/corporate_disk_co
  * Implements hook_permission().
  */
 function corporate_disk_company_permission() {
-  return array(
-    'access corporate disk module' => array(
+  return [
+    'access corporate disk module' => [
       'title' => t('Access Corporate Disk Fulfillment Module'),
       'description' => t('Perform administration tasks for Disk.com module.'),
-    ),
-  );
+    ],
+  ];
 }
 
 /**
@@ -24,7 +24,7 @@ function corporate_disk_company_permission() {
  * Adds the CSS needed for the pages to the head of the document.
  */
 function corporate_disk_company_preprocess_html() {
-  drupal_add_css(drupal_get_path('module', 'corporate_disk_company') . '/css/corporate-disk-company.css', array('every_page' => TRUE));
+  drupal_add_css(drupal_get_path('module', 'corporate_disk_company') . '/css/corporate-disk-company.css', ['every_page' => TRUE]);
 }
 
 /**
@@ -38,49 +38,49 @@ function corporate_disk_company_module_access() {
  * Implements hook_menu().
  */
 function corporate_disk_company_menu() {
-  $items = array();
-  $items['admin/config/services/corporatedisk'] = array(
+  $items = [];
+  $items['admin/config/services/corporatedisk'] = [
     'title' => t('Corporate Disk Fulfillment Service'),
     'description' => t('Configure Disk.com integration.'),
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('corporate_disk_admin_settings'),
+    'page arguments' => ['corporate_disk_admin_settings'],
     'access callback' => 'corporate_disk_company_module_access',
     'file' => 'corporate_disk_company.admin.inc',
-  );
-  $items['admin/config/services/corporatedisk/default'] = array(
+  ];
+  $items['admin/config/services/corporatedisk/default'] = [
     'title' => t('Corporate Disk Fulfillment'),
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => 0,
-  );
-  $items['admin/config/services/corporatedisk/shippingservices'] = array(
+  ];
+  $items['admin/config/services/corporatedisk/shippingservices'] = [
     'title' => t('Available Shipping Services'),
     'description' => t('Configure Disk.com shipping services.'),
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('corporate_disk_admin_settings_shipping'),
+    'page arguments' => ['corporate_disk_admin_settings_shipping'],
     'access callback' => 'corporate_disk_company_module_access',
     'type' => MENU_LOCAL_TASK,
     'weight' => 5,
     'file' => 'corporate_disk_company.admin.inc',
-  );
-  $items['admin/config/services/corporatedisk/shippingservicesconfig'] = array(
+  ];
+  $items['admin/config/services/corporatedisk/shippingservicesconfig'] = [
     'title' => t('Shipping Configuration for Cart'),
     'description' => t('Configure Disk.com shipping services.'),
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('corporate_disk_admin_settings_shipping_configuration'),
+    'page arguments' => ['corporate_disk_admin_settings_shipping_configuration'],
     'access callback' => 'corporate_disk_company_module_access',
     'type' => MENU_LOCAL_TASK,
     'weight' => 10,
     'file' => 'corporate_disk_company.admin.inc',
-  );
-  $items['admin/config/services/corporatedisk/failures'] = array(
+  ];
+  $items['admin/config/services/corporatedisk/failures'] = [
     'title' => t('Failures'),
     'description' => t('Orders that failed to be processed.'),
-    'page arguments' => array('corporate_disk_company_failed_orders'),
+    'page arguments' => ['corporate_disk_company_failed_orders'],
     'access callback' => 'corporate_disk_company_module_access',
     'type' => MENU_LOCAL_TASK,
     'weight' => 15,
     'file' => 'corporate_disk_company.admin.inc',
-  );
+  ];
   return $items;
 }
 
@@ -123,17 +123,19 @@ function corporate_disk_company_entity_view($entity, $entity_type, $view_mode, $
     $markup .= t(filter_xss(variable_get('corporate_disk_company_order_view_message_footer', '')));
     $markup .= '</div></div>';
 
-    $entity->content['tracking'] = array(
+    $entity->content['tracking'] = [
       '#weight' => 9,
       '#markup' => $markup,
       '#access' => commerce_order_access('view', $entity),
-    );
+    ];
   }
 }
 
 /**
  * Helper function to build html to show tracking numbers on orders
+ *
  * @param object $order
+ *
  * @return $output
  */
 function corporate_disk_company_order_tracking_numbers_view($order) {
@@ -142,26 +144,26 @@ function corporate_disk_company_order_tracking_numbers_view($order) {
   $result = db_query($sql)
     ->fetchAll();
   // Lets create an array of items that need to be updated.
-  $rows = array();
-  $headers = array(
+  $rows = [];
+  $headers = [
     'Shipping Service',
     'Tracking Number',
-  );
+  ];
   // @TODO Add tracking links based on the service used
   foreach ($result as $items) {
-    $rows[] = array(
+    $rows[] = [
       $items->shipping_service,
-      l($items->tracking_number, 'https://tools.usps.com/go/TrackConfirmAction.action?tLabels=' . $items->tracking_number, array('attributes' => array('target' => '_blank'))),
-    );
+      l($items->tracking_number, 'https://tools.usps.com/go/TrackConfirmAction.action?tLabels=' . $items->tracking_number, ['attributes' => ['target' => '_blank']]),
+    ];
   }
   if (count($rows) === 0) {
-    $headers = array();
-    $row = array(
+    $headers = [];
+    $row = [
       t('No tracking information is available at this time or your order has no tracking.'),
-    );
-    $rows = array($row);
+    ];
+    $rows = [$row];
   }
-  $output = theme('table', array('header' => $headers, 'rows' => $rows));
+  $output = theme('table', ['header' => $headers, 'rows' => $rows]);
   return $output;
 }
 
@@ -169,8 +171,8 @@ function corporate_disk_company_order_tracking_numbers_view($order) {
  * Implements hook_entity_info().
  */
 function corporate_disk_company_entity_info() {
-  $return = array(
-    'corporate_disk_company_shipment' => array(
+  $return = [
+    'corporate_disk_company_shipment' => [
       'label' => t('Corporate Disk Company Shipment'),
       'entity class' => 'CorporateDiskCompanyShipment',
       'controller class' => 'EntityAPIController',
@@ -178,11 +180,11 @@ function corporate_disk_company_entity_info() {
       'module' => 'corporate_disk_company',
       'base table' => 'corporate_disk_company_shipments',
       'fieldable' => TRUE,
-      'entity keys' => array(
+      'entity keys' => [
         'id' => 'order_number',
-      ),
-    ),
-  );
+      ],
+    ],
+  ];
 
   return $return;
 }

@@ -100,11 +100,11 @@ function corporate_disk_company_process($caller) {
       $countryname = rawurlencode($countryarray[$country]);
       // Query to get the shipping method selected for the order.
       $shippingrow = db_select('commerce_line_item', 'c')
-          ->fields('c')
-          ->condition('order_id', $order->order_number, '=')
-          ->condition('type', 'shipping', 'like')
-          ->execute()
-          ->fetchAssoc();
+        ->fields('c')
+        ->condition('order_id', $order->order_number, '=')
+        ->condition('type', 'shipping', 'like')
+        ->execute()
+        ->fetchAssoc();
       if (!empty($shippingrow)) {
         $shippingvar = 'corporate_disk_company_shipping_services_' . $commerce_shipping_service_names[$shippingrow['line_item_label']];
         $shippingtype = variable_get($shippingvar, '');
@@ -134,7 +134,7 @@ function corporate_disk_company_process($caller) {
         }
       }
       else {
-        $sku_replacements_bundles = array();
+        $sku_replacements_bundles = [];
       }
       // Do we have a global SKU replacement?
       $needle = variable_get('corporate_disk_company_base_sku_substitution_needle', '');
@@ -201,16 +201,16 @@ function corporate_disk_company_process($caller) {
       $url .= $disk_userdef2 . '|' . $disk_userdef3 . '|' . $disk_ending_string;
 
       $result = db_select('corporate_disk_company_shipments', 'c')
-          ->fields('c')
-          ->condition('order_number', $order->order_number, '=')
-          ->execute()
-          ->rowCount();
+        ->fields('c')
+        ->condition('order_number', $order->order_number, '=')
+        ->execute()
+        ->rowCount();
       // This is to make certain the orders have not been sent before.
       if ($result < 1) {
         // UI Switch to turn live transactions on or off.
         $status = variable_get('corporate_disk_company_live_status', 0);
         if ($status == 1) {
-          $options = array(
+          $options = [
             CURLOPT_RETURNTRANSFER => TRUE, // return web page
             CURLOPT_HEADER => FALSE, // don't return headers
             CURLOPT_FOLLOWLOCATION => TRUE, // follow redirects
@@ -220,12 +220,12 @@ function corporate_disk_company_process($caller) {
             CURLOPT_SSL_VERIFYHOST => FALSE, // Don't verify host
             CURLOPT_SSL_VERIFYPEER => FALSE, // Don't verify peer
             CURLOPT_CUSTOMREQUEST => 'GET', // HTTP request method
-          );
+          ];
           $ch = curl_init($url);
           curl_setopt_array($ch, $options);
           $content = curl_exec($ch);
           if (curl_errno($ch)) {
-            watchdog('corporate_disk_company', '<h2>cURL Fault</h2><br /><b>cURL Error Code:</b> @exc', array('@exc' => curl_errno($ch)));
+            watchdog('corporate_disk_company', '<h2>cURL Fault</h2><br /><b>cURL Error Code:</b> @exc', ['@exc' => curl_errno($ch)]);
             $disk_error_number = curl_errno($ch);
             // Now to handle the error code for reprocessing.
             switch ($disk_error_number) {
@@ -238,7 +238,7 @@ function corporate_disk_company_process($caller) {
             }
           }
           else {
-            $resarr = array();
+            $resarr = [];
             $resarr = json_decode($content);
             $confirmation = trim(filter_xss($resarr));
           }
@@ -288,34 +288,33 @@ function corporate_disk_company_tracking($caller = NULL) {
   }
   // Lets pull orders that need to be updated with tracking numbers.
   $sql = 'SELECT * from {corporate_disk_company_shipments} '
-      . 'where order_updated = \'0\' '
-      . 'AND shipping_service NOT LIKE \'USPS First Class\' '
-      . 'AND '
-      . '(confirmation IS NOT NULL '
-      . 'OR confirmation != \'\' '
-      . 'OR confirmation NOT LIKE \'DISK\' '
-      . 'OR confirmation NOT LIKE \'TRANS\')';
-  $result = db_query($sql)
-      ->fetchAll();
+    . 'where order_updated = \'0\' '
+    . 'AND shipping_service NOT LIKE \'USPS First Class\' '
+    . 'AND '
+    . '(confirmation IS NOT NULL '
+    . 'OR confirmation != \'\' '
+    . 'OR confirmation NOT LIKE \'DISK\' '
+    . 'OR confirmation NOT LIKE \'TRANS\')';
+  $result = db_query($sql)->fetchAll();
   $count = $result->num_rows;
   if ($count == 0) {
     // Stop processing if there are no orders to update.
     return TRUE;
   }
-  $orders = array();
-  $orders_update = array();
-  $responsearray = array();
+  $orders = [];
+  $orders_update = [];
+  $responsearray = [];
   // Lets create an array of items that need to be updated.
   foreach ($result as $items) {
-    $orders[] = array(
+    $orders[] = [
       'ordernumber' => $items->order_number,
       'orderconfirm' => $items->confirmation,
-    );
+    ];
   }
   $id = variable_get('corporate_disk_company_companyid', '');
   try {
     foreach ($orders as $key => $value) {
-      $context = stream_context_create(array('http' => array('header' => 'Accept: application/xml')));
+      $context = stream_context_create(['http' => ['header' => 'Accept: application/xml']]);
       $url = 'http://customers.disk.com/shippinginfo.jsp?cid=' . $id . '&packageshipmentid=' . trim($value['orderconfirm']);
       $response = file_get_contents($url, FALSE, $context);
       $response = filter_xss($response);
@@ -326,25 +325,25 @@ function corporate_disk_company_tracking($caller = NULL) {
       }
       if ($responsearray['status'] == 'completed' && !empty($responsearray['tracking-number'])) {
         // Create an array of order numbers and tracking numbers to do DB updates with.
-        $orders_update[] = array(
+        $orders_update[] = [
           'status' => $responsearray['status'],
           'ordernumber' => $value['ordernumber'],
           'trackingno' => $responsearray['tracking-number'],
-        );
+        ];
       }
     }
     foreach ($orders_update as $items) {
       db_update('corporate_disk_company_shipments')
-          ->fields(array(
-            'tracking_number' => $items['trackingno'],
-            'order_updated' => 1,
-          ))
-          ->condition('order_number', $items['ordernumber'], '=')
-          ->execute();
+        ->fields([
+          'tracking_number' => $items['trackingno'],
+          'order_updated' => 1,
+        ])
+        ->condition('order_number', $items['ordernumber'], '=')
+        ->execute();
     }
   }
   catch (Exception $e) {
-    watchdog('corporate_disk_company', '<h2>General Fault</h2><br /><b>Code:</b> @exc', array('@exc' => $exc));
+    watchdog('corporate_disk_company', '<h2>General Fault</h2><br /><b>Code:</b> @exc', ['@exc' => $exc]);
     return FALSE;
   }
   // We need to label orders that are First class that there is no tracking
@@ -352,23 +351,23 @@ function corporate_disk_company_tracking($caller = NULL) {
   try {
     // $sql = 'SELECT * from {corporate_disk_company_shipments} where order_updated = \'0\' and shipping_service LIKE \'USPS First Class\'';
     $query = db_select('corporate_disk_company_shipments', 'c')
-        ->fields('c')
-        ->condition('order_updated', '0', '=')
-        ->condition('shipping_service', 'USPS First Class', 'LIKE');
+      ->fields('c')
+      ->condition('order_updated', '0', '=')
+      ->condition('shipping_service', 'USPS First Class', 'LIKE');
     $result = $query->execute();
     foreach ($result as $items) {
       db_update('corporate_disk_company_shipments')
-          ->fields(array(
-            'tracking_number' => 'Tracking number not supported',
-            'order_updated' => 1,
-          ))
-          ->condition('order_number', $items->order_number, '=')
-          ->execute();
+        ->fields([
+          'tracking_number' => 'Tracking number not supported',
+          'order_updated' => 1,
+        ])
+        ->condition('order_number', $items->order_number, '=')
+        ->execute();
     }
     return TRUE;
   }
   catch (Exception $e) {
-    watchdog('corporate_disk_company', '<h2>General Fault</h2><br /><b>Code:</b> @exc', array('@exc' => $exc));
+    watchdog('corporate_disk_company', '<h2>General Fault</h2><br /><b>Code:</b> @exc', ['@exc' => $exc]);
     return FALSE;
   }
 }
@@ -381,9 +380,9 @@ function corporate_disk_company_scrap_failures($caller = NULL) {
     return FALSE;
   }
   $results = db_select('corporate_disk_company_shipments', 'c')
-      ->fields('c')
-      ->condition('confirmation', 'DISK-RETRY', 'LIKE')
-      ->execute();
+    ->fields('c')
+    ->condition('confirmation', 'DISK-RETRY', 'LIKE')
+    ->execute();
   $count = $results->rowCount();
   if ($count < 1) {
     //Stop we have nothing to do
@@ -391,7 +390,7 @@ function corporate_disk_company_scrap_failures($caller = NULL) {
   }
   else {
     foreach ($results as $items) {
-      $options = array(
+      $options = [
         CURLOPT_RETURNTRANSFER => TRUE, // return web page
         CURLOPT_HEADER => FALSE, // don't return headers
         CURLOPT_FOLLOWLOCATION => TRUE, // follow redirects
@@ -401,23 +400,23 @@ function corporate_disk_company_scrap_failures($caller = NULL) {
         CURLOPT_SSL_VERIFYHOST => FALSE, // Don't verify host
         CURLOPT_SSL_VERIFYPEER => FALSE, // Don't verify peer
         CURLOPT_CUSTOMREQUEST => 'GET', // HTTP request method
-      );
+      ];
       $ch = curl_init($items->service_post);
       curl_setopt_array($ch, $options);
       $content = curl_exec($ch);
       if (curl_errno($ch)) {
-        watchdog('corporate_disk_company', '<h2>cURL Fault - Order Retry Subroutine</h2><br /><b>cURL Error Code:</b> @exc', array('@exc' => curl_errno($ch)));
+        watchdog('corporate_disk_company', '<h2>cURL Fault - Order Retry Subroutine</h2><br /><b>cURL Error Code:</b> @exc', ['@exc' => curl_errno($ch)]);
       }
       else {
-        $resarr = array();
+        $resarr = [];
         $resarr = json_decode($content);
         $confirmation = trim(filter_xss($resarr));
         $queue = db_update('corporate_disk_company_shipments')
-            ->fields(array(
-              'confirmation' => $confirmation,
-            ))
-            ->condition('order_number', $items->order_number, '=')
-            ->execute();
+          ->fields([
+            'confirmation' => $confirmation,
+          ])
+          ->condition('order_number', $items->order_number, '=')
+          ->execute();
       }
       curl_close($ch);
       return TRUE;

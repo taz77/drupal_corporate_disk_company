@@ -28,7 +28,7 @@ class CorporateDiskCompanyShipment extends Entity {
 
   /**
    * Has the order been processed to Delivra yet.
-   * 
+   *
    * @var int
    */
   public $order_updates = 0;
@@ -40,7 +40,7 @@ class CorporateDiskCompanyShipment extends Entity {
    */
   public $shipping_service = '';
 
-  public function __construct(array $values = array(), $entityType = NULL) {
+  public function __construct(array $values = [], $entityType = NULL) {
     parent::__construct($values, 'corporate_disk_company_shipments');
   }
 
