@@ -163,7 +163,13 @@ function corporate_disk_company_order_tracking_numbers_view($order) {
     ];
     $rows = [$row];
   }
-  $output = theme('table', ['header' => $headers, 'rows' => $rows]);
+  try {
+    $output = theme('table', ['header' => $headers, 'rows' => $rows]);
+  }
+  catch (Exception $e) {
+    watchdog('corporate_disk_company', 'Theming failed for content. Error: %e', ['%e' => $e], WATCHDOG_ERROR);
+    return FALSE;
+  }
   return $output;
 }
 
