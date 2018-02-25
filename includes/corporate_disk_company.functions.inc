@@ -380,7 +380,6 @@ function corporate_disk_company_scrap_failures($caller = NULL) {
   if ($caller != 'cron' && $caller != 'testpage') {
     return FALSE;
   }
-  $rows = array();
   $results = db_select('corporate_disk_company_shipments', 'c')
       ->fields('c')
       ->condition('confirmation', 'DISK-RETRY', 'LIKE')
