@@ -246,29 +246,39 @@ function corporate_disk_company_process($caller) {
           // Only insert data into the databse if we got a response.
           // This is to handle situations where disk.com is unreachable.
           if (!empty($confirmation)) {
-            $queue = db_insert('corporate_disk_company_shipments')
-                ->fields(array(
+            try {
+              db_insert('corporate_disk_company_shipments')
+                ->fields([
                   'order_number' => $order->order_number,
                   'confirmation' => $confirmation,
                   'service_post' => $url,
                   'shipping_service' => $shippingtype,
                   'created_at' => REQUEST_TIME,
-                ))
+                ])
                 ->execute();
+            }
+            catch (Exception $e) {
+              watchdog('corporate_disk_company', t('DB Insertion failed. Error: %e'), ['%e' => $e], 'WATCHDOG_ERROR');
+            }
           }
           unset($response);
         }
         else {
           $confirmation = 'TRANS-DISABLED';
-          $queue = db_insert('corporate_disk_company_shipments')
-              ->fields(array(
+          try {
+            db_insert('corporate_disk_company_shipments')
+              ->fields([
                 'order_number' => $order->order_number,
                 'confirmation' => $confirmation,
                 'service_post' => $url,
                 'shipping_service' => $shippingtype,
                 'created_at' => REQUEST_TIME,
-              ))
+              ])
               ->execute();
+          }
+          catch (Exception $e) {
+            watchdog('corporate_disk_company', t('DB Insertion failed. Error: %e'), ['%e' => $e], 'WATCHDOG_ERROR');
+          }
         }
       }
     }
