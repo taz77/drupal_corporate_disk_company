@@ -56,7 +56,7 @@ function corporate_disk_company_variable_info($options) {
   $variable['corporate_disk_company_base_sku_list'] = [
     'title' => t('Baseline SKU List'),
     'type' => 'string',
-    'description' => t('This is a Key Value pair list of the baseline product SKUs.  The keys are integer values. The values are the SKU.  These values must match what is stored in Disk.com.  <br />An example would be: 07|106-2'),
+    'description' => t('This is a Key Value pair list of the baseline product SKUs.  The keys are integer values. The values are the SKU.  These values must match what is stored in Disk.com.') . '<br />' . t('An example would be: 07|106-2'),
     'access' => 'access corporate disk module',
     'group' => 'corporate_disk_company',
   ];
@@ -70,21 +70,21 @@ function corporate_disk_company_variable_info($options) {
   $variable['corporate_disk_company_base_sku_substitution_haystack'] = [
     'title' => t('Substitution Replacement'),
     'type' => 'string',
-    'description' => t('What is our substitution.  <strong>This must match the patterns in the <i>Baseline SKU List</i> above or you will break this module!</strong>'),
+    'description' => t('What is our substitution.') . '  <strong>' . t('This must match the patterns in the ') . '<i>' . t('Baseline SKU List') . '</i> ' . t('above or you will break this module!') . '</strong>',
     'access' => 'access corporate disk module',
     'group' => 'corporate_disk_company',
   ];
   $variable['corporate_disk_company_bundle_sku_list'] = [
     'title' => t('Bundled SKU List'),
     'type' => 'string',
-    'description' => t('<b>These are processed before substitutions and hence you must manual translate the substitution here!</b><br />This is a Key Value pair list of the <b>BUNDLED</b> product SKUs.  The keys are bundle SKU. The values are the base SKUs the bundle represents delimitered by spaces.  <b>The values must match the baseline SKUs that are stored on Disk.com listed above!</b>  An example would be: <br /> 502-2|106-2 200-2'),
+    'description' => '<b>' . t('These are processed before substitutions and hence you must manual translate the substitution here!') . ' </b><br />' . t('This is a Key Value pair list of the') . ' <b>' . t('BUNDLED') . '</b> ' . t('product SKUs.  The keys are bundle SKU. The values are the base SKUs the bundle represents delimitered by spaces.') . ' <b>' . t('The values must match the baseline SKUs that are stored on Disk.com listed above!') . '</b> ' . t(' An example would be:') . ' <br />' . t('502-2|106-2 200-2'),
     'access' => 'access corporate disk module',
     'group' => 'corporate_disk_company',
   ];
   $variable['corporate_disk_company_shipping_services'] = [
     'title' => t('Available shipping methods'),
     'type' => 'string',
-    'description' => t('<b>This is a list of the available shipping methods offered at Disk.com as they exist in their API.</b><br />One per line.'),
+    'description' => '<b>' .  t('This is a list of the available shipping methods offered at Disk.com as they exist in their API.') . '</b><br /> ' . t('One per line.'),
     'access' => 'access corporate disk module',
     'group' => 'corporate_disk_company',
   ];
