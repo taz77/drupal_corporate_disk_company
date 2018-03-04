@@ -309,7 +309,7 @@ function corporate_disk_company_tracking($caller = NULL) {
     . 'OR confirmation NOT LIKE \'DISK\' '
     . 'OR confirmation NOT LIKE \'TRANS\')';
   $result = db_query($sql)->fetchAll();
-  $count = $result->num_rows;
+  $count = $result->rowCount();
   if ($count == 0) {
     // Stop processing if there are no orders to update.
     return TRUE;
