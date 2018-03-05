@@ -293,23 +293,33 @@ function corporate_disk_company_process($caller) {
 
 /**
  * Function to update accounts with tracking numbers.
+ *
+ * @return mixed
+ *  - Returns the number of orders updated if there are no problems. False
+ *    otherwise.
  */
-function corporate_disk_company_tracking($caller = NULL) {
-  // We only want cron to be able to call this or our testing page.
-  if ($caller != 'cron' && $caller != 'testpage') {
-    return FALSE;
-  }
+function corporate_disk_company_tracking() {
   // Lets pull orders that need to be updated with tracking numbers.
   $sql = 'SELECT * from {corporate_disk_company_shipments} '
-    . 'where order_updated = \'0\' '
-    . 'AND shipping_service NOT LIKE \'USPS First Class\' '
-    . 'AND '
-    . '(confirmation IS NOT NULL '
-    . 'OR confirmation != \'\' '
-    . 'OR confirmation NOT LIKE \'DISK\' '
-    . 'OR confirmation NOT LIKE \'TRANS\')';
-  $result = db_query($sql)->fetchAll();
-  $count = $result->rowCount();
+    . 'where order_updated = :orderupdated '
+    . 'AND shipping_service NOT LIKE :shipservice '
+    . 'AND confirmation IS NOT NULL '
+    . 'AND confirmation != :confirmation1 '
+    . 'AND confirmation NOT LIKE :confirmation2 '
+    . 'AND confirmation NOT LIKE :confirmation3 '
+    . 'AND confirmation != :confirmation4';
+
+  $substitutes = [
+    ':orderupdated' => 0,
+    ':shipservice' => '%USPS First%',
+    ':confirmation1' => '',
+    ':confirmation2' => '%DISK%',
+    ':confirmation3' => '%TRANS%',
+    ':confirmation4' => 0,
+  ];
+  $result = db_query($sql, $substitutes)->fetchAll();
+  $count = count($result);
+
   if ($count == 0) {
     // Stop processing if there are no orders to update.
     return TRUE;
