@@ -339,20 +339,31 @@ function corporate_disk_company_tracking() {
     foreach ($orders as $key => $value) {
       $context = stream_context_create(['http' => ['header' => 'Accept: application/xml']]);
       $url = 'http://customers.disk.com/shippinginfo.jsp?cid=' . $id . '&packageshipmentid=' . trim($value['orderconfirm']);
-      $response = file_get_contents($url, FALSE, $context);
-      $response = filter_xss($response);
+      $response = trim(file_get_contents($url, FALSE, $context));
       $response = simplexml_load_string($response);
       $vars = get_object_vars($response);
       foreach ($vars as $key => $val) {
-        $responsearray[$key] = $val;
+        $responsearray[filter_xss($key)] = filter_xss($val);
       }
-      if ($responsearray['status'] == 'completed' && !empty($responsearray['tracking-number'])) {
-        // Create an array of order numbers and tracking numbers to do DB updates with.
-        $orders_update[] = [
-          'status' => $responsearray['status'],
-          'ordernumber' => $value['ordernumber'],
-          'trackingno' => $responsearray['tracking-number'],
-        ];
+      switch ($responsearray['status']) {
+        case 'completed':
+          if (!empty($responsearray['tracking-number'])) {
+            // Create an array of order numbers and tracking numbers to do DB updates with.
+            $orders_update[] = [
+              'status' => $responsearray['status'],
+              'ordernumber' => $value['ordernumber'],
+              'trackingno' => $responsearray['tracking-number'],
+            ];
+          }
+          break;
+
+        case 'n/a':
+          $orders_update[] = [
+            'status' => $responsearray['status'],
+            'ordernumber' => $value['ordernumber'],
+            'trackingno' => 'Shipment is non-existant. Please contanct customer service.',
+          ];
+          break;
       }
     }
     foreach ($orders_update as $items) {
