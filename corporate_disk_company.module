@@ -81,6 +81,15 @@ function corporate_disk_company_menu() {
     'weight' => 15,
     'file' => 'corporate_disk_company.admin.inc',
   ];
+  $items['admin/config/services/corporatedisk/updatetracking'] = [
+    'title' => t('Tracking Update'),
+    'description' => t('Update and view tracking information for orders.'),
+    'page arguments' => ['corporate_disk_company_update_tracking'],
+    'access callback' => 'corporate_disk_company_module_access',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 15,
+    'file' => 'corporate_disk_company.admin.inc',
+  ];
   return $items;
 }
 

@@ -314,3 +314,31 @@ function corporate_disk_company_failed_orders() {
     return $page;
   }
 }
+
+/**
+ * Page callback to all an admin to update tracking numbers.
+ */
+function corporate_disk_company_update_tracking() {
+  $form = [];
+  $form['corporate_disk_company_update'] = [
+    '#type' => 'fieldset',
+    '#title' => t('Run Tracking Number Update'),
+    '#description' => t('This will update any order that has not been updated for tracking by cron.'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+  ];
+  $form['corporate_disk_company_update']['clear'] = [
+    '#type' => 'submit',
+    '#value' => t('Update Tracking Numbers'),
+    '#submit' => ['corporate_disk_company_update_tracking_perform_submit'],
+  ];
+  return $form;
+}
+
+/**
+ * Submit callback: clear database with log messages.
+ */
+function corporate_disk_company_update_tracking_perform_submit() {
+  $return = corporate_disk_company_tracking();
+  drupal_set_message(t('Tracking updated.') . ' ' . $return . ' ' . t('orders updated.'));
+}
