@@ -366,7 +366,7 @@ function corporate_disk_company_tracking($caller = NULL) {
     $query = db_select('corporate_disk_company_shipments', 'c')
       ->fields('c')
       ->condition('order_updated', '0', '=')
-      ->condition('shipping_service', 'USPS First Class', 'LIKE');
+      ->condition('shipping_service', '%USPS First%', 'LIKE');
     $result = $query->execute();
     foreach ($result as $items) {
       db_update('corporate_disk_company_shipments')
@@ -377,7 +377,7 @@ function corporate_disk_company_tracking($caller = NULL) {
         ->condition('order_number', $items->order_number, '=')
         ->execute();
     }
-    return TRUE;
+    return $count;
   }
   catch (Exception $e) {
     watchdog('corporate_disk_company', '<h2>General Fault</h2><br /><b>Code:</b> @exc', ['@exc' => $exc]);
