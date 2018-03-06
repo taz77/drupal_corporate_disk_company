@@ -364,6 +364,14 @@ function corporate_disk_company_tracking() {
             'trackingno' => 'Shipment is non-existant. Please contanct customer service.',
           ];
           break;
+
+        case NULL:
+          $orders_update[] = [
+            'status' => $responsearray['status'],
+            'ordernumber' => $value['ordernumber'],
+            'trackingno' => 'Shipment is non-existant. Please contanct customer service.',
+          ];
+          break;
       }
     }
     foreach ($orders_update as $items) {
