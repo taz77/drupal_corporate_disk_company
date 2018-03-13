@@ -356,21 +356,12 @@ function corporate_disk_company_tracking() {
           }
           break;
 
-        case 'n/a':
+        case 0;
           $orders_update[] = [
             'status' => filter_xss($responsearray['status']),
             'ordernumber' => $value['ordernumber'],
             'trackingno' => 'Shipment is non-existant. Please contanct customer service.',
           ];
-          break;
-
-        case NULL:
-          $orders_update[] = [
-            'status' => filter_xss($responsearray['status']),
-            'ordernumber' => $value['ordernumber'],
-            'trackingno' => 'Shipment is non-existant. Please contanct customer service.',
-          ];
-          break;
       }
       unset($responsearray);
       unset($response);
