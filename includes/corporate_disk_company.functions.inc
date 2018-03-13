@@ -388,7 +388,7 @@ function corporate_disk_company_tracking() {
     }
   }
   catch (Exception $e) {
-    watchdog('corporate_disk_company', '<h2>General Fault</h2><br /><b>Code:</b> @exc', ['@exc' => $exc]);
+    watchdog('corporate_disk_company', '<h2>General Fault</h2><br /><b>Code:</b> @exc', ['@exc' => $e]);
     return FALSE;
   }
   // We need to label orders that are First class that there is no tracking
@@ -412,7 +412,7 @@ function corporate_disk_company_tracking() {
     return $count;
   }
   catch (Exception $e) {
-    watchdog('corporate_disk_company', '<h2>General Fault</h2><br /><b>Code:</b> @exc', ['@exc' => $exc]);
+    watchdog('corporate_disk_company', '<h2>General Fault</h2><br /><b>Code:</b> @exc', ['@exc' => $e]);
     return FALSE;
   }
 }
