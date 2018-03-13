@@ -119,8 +119,8 @@ function corporate_disk_company_update_7200() {
       }
     }
   }
-  catch (Exception $exc) {
-    watchdog('corporate_disk_company', '<h2>General Fault during update</h2><br /><b>Code:</b> @exc', ['@exc' => $exc]);
+  catch (Exception $e) {
+    watchdog('corporate_disk_company', '<h2>General Fault during update</h2><br /><b>Code:</b> @exc', ['@exc' => $e]);
     return FALSE;
   }
 
@@ -144,8 +144,8 @@ function corporate_disk_company_update_7200() {
         ->execute();
     }
   }
-  catch (Exception $exc) {
-    watchdog('corporate_disk_company', '<h2>General Fault during update</h2><br /><b>Code:</b> @exc', ['@exc' => $exc]);
+  catch (Exception $e) {
+    watchdog('corporate_disk_company', '<h2>General Fault during update</h2><br /><b>Code:</b> @exc', ['@exc' => $e]);
     return FALSE;
   }
 }
