@@ -302,27 +302,26 @@ function corporate_disk_company_tracking() {
   // Lets pull orders that need to be updated with tracking numbers.
   $sql = 'SELECT * from {corporate_disk_company_shipments} '
     . 'where order_updated = :orderupdated '
-    . 'AND shipping_service NOT LIKE :shipservice '
     . 'AND confirmation IS NOT NULL '
     . 'AND confirmation != :confirmation1 '
     . 'AND confirmation NOT LIKE :confirmation2 '
     . 'AND confirmation NOT LIKE :confirmation3 '
-    . 'AND confirmation != :confirmation4';
+    . 'AND confirmation != :confirmation4 '
+    . 'AND confirmation NOT LIKE :confirmation5';
 
   $substitutes = [
     ':orderupdated' => 0,
-    ':shipservice' => '%USPS First%',
     ':confirmation1' => '',
-    ':confirmation2' => '%DISK%',
+    ':confirmation2' => '%cURL%',
     ':confirmation3' => '%TRANS%',
     ':confirmation4' => 0,
+    ':confirmation5' => 'DISK-RETRY',
   ];
   $result = db_query($sql, $substitutes)->fetchAll();
   $count = count($result);
-
   if ($count == 0) {
     // Stop processing if there are no orders to update.
-    return TRUE;
+    return 0;
   }
   $orders = [];
   $orders_update = [];
