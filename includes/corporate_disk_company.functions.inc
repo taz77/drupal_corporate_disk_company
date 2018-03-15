@@ -373,33 +373,41 @@ function corporate_disk_company_tracking() {
       unset($response);
       unset($vars);
     }
+
     foreach ($orders_update as $items) {
-      db_update('corporate_disk_company_shipments')
-        ->fields([
+      if (!empty($items['status'])) {
+        $fields = [
           'tracking_number' => $items['trackingno'],
           'order_updated' => 1,
-        ])
+        ];
+      }
+      else {
+        $fields = [
+          'tracking_number' => 'Contact support for assistance',
+          'order_updated' => 1,
+        ];
+      }
+      db_update('corporate_disk_company_shipments')
+        ->fields($fields)
         ->condition('order_number', $items['ordernumber'], '=')
         ->execute();
     }
   }
   catch (Exception $e) {
-    watchdog('corporate_disk_company', '<h2>General Fault</h2><br /><b>Code:</b> @exc', ['@exc' => $e]);
+    watchdog('corporate_disk_company', '<p>Error processing updates.</p><h2>General Fault</h2><br /><b>Code:</b> @exc', ['@exc' => $e]);
     return FALSE;
   }
-  // We need to label orders that are First class that there is no tracking
-  // @todo If Disk.com changes the names of shipping this code must be updated
+  // We need to label orders that are First Class that there is no tracking.
   try {
-    // $sql = 'SELECT * from {corporate_disk_company_shipments} where order_updated = \'0\' and shipping_service LIKE \'USPS First Class\'';
     $query = db_select('corporate_disk_company_shipments', 'c')
       ->fields('c')
       ->condition('order_updated', '0', '=')
-      ->condition('shipping_service', '%USPS First%', 'LIKE');
+      ->condition('shipping_service', 'USPS First Class', '=');
     $result = $query->execute();
     foreach ($result as $items) {
       db_update('corporate_disk_company_shipments')
         ->fields([
-          'tracking_number' => 'Tracking number not supported',
+          'tracking_number' => 'Tracking not supported',
           'order_updated' => 1,
         ])
         ->condition('order_number', $items->order_number, '=')
