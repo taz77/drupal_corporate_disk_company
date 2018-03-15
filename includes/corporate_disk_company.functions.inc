@@ -342,10 +342,10 @@ function corporate_disk_company_tracking() {
       $responsexml = simplexml_load_string($response);
       $responsearray['status'] = $responsexml->status;
       $responsearray['tracking-number'] = $responsexml->{'tracking-number'};
-      
+
       switch ($responsearray['status']) {
         case 'completed':
-          if (!empty($responsearray['tracking-number'])) {
+          if ($responsearray['tracking-number'] != 0) {
             // Create an array of order numbers and tracking numbers to do DB updates with.
             $orders_update[] = [
               'status' => filter_xss($responsearray['status']),
