@@ -340,5 +340,10 @@ function corporate_disk_company_update_tracking() {
  */
 function corporate_disk_company_update_tracking_perform_submit() {
   $return = corporate_disk_company_tracking();
-  drupal_set_message(t('Tracking updated.') . ' ' . $return . ' ' . t('orders updated.'));
+  if ($return) {
+    drupal_set_message(t('Tracking updated.') . ' ' . $return . ' ' . t('orders updated.'));
+  }
+  else {
+    drupal_set_message(t('An error was produced updating the tracking number. Please review your Drupal logs.'));
+  }
 }
