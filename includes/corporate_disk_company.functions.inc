@@ -353,6 +353,13 @@ function corporate_disk_company_tracking() {
               'trackingno' => filter_xss($responsearray['tracking-number']),
             ];
           }
+          else {
+            $orders_update[] = [
+              'status' => filter_xss($responsearray['status']),
+              'ordernumber' => $value['ordernumber'],
+              'trackingno' => 'Tracking number missing',
+            ];
+          }
           break;
 
         case 0;
@@ -401,7 +408,7 @@ function corporate_disk_company_tracking() {
     return $count;
   }
   catch (Exception $e) {
-    watchdog('corporate_disk_company', '<h2>General Fault</h2><br /><b>Code:</b> @exc', ['@exc' => $e]);
+    watchdog('corporate_disk_company', '<p>Error updating database for items that do not get tracking data.</p> <h2>General Fault</h2><br /><b>Code:</b> @exc', ['@exc' => $e]);
     return FALSE;
   }
 }
