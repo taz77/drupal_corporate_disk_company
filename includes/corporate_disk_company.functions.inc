@@ -348,25 +348,34 @@ function corporate_disk_company_tracking() {
           if ($responsearray['tracking-number'] != 0) {
             // Create an array of order numbers and tracking numbers to do DB updates with.
             $orders_update[] = [
-              'status' => filter_xss($responsearray['status']),
               'ordernumber' => $value['ordernumber'],
               'trackingno' => filter_xss($responsearray['tracking-number']),
+              'order_updated' => 1,
             ];
           }
           else {
             $orders_update[] = [
-              'status' => filter_xss($responsearray['status']),
               'ordernumber' => $value['ordernumber'],
               'trackingno' => 'Tracking number missing',
+              'order_updated' => 1,
             ];
           }
           break;
 
+        case 'processing':
+          $orders_update[] = [
+            'ordernumber' => $value['ordernumber'],
+            'trackingno' => 'Processing. Please check back for updates.',
+            'order_updated' => 0,
+          ];
+
+          break;
+
         case 0;
           $orders_update[] = [
-            'status' => filter_xss($responsearray['status']),
             'ordernumber' => $value['ordernumber'],
             'trackingno' => 'Shipment is non-existant. Please contanct customer service.',
+            'order_updated' => 1,
           ];
       }
       unset($responsearray);
@@ -375,24 +384,17 @@ function corporate_disk_company_tracking() {
     }
 
     foreach ($orders_update as $items) {
-      if (!empty($items['status'])) {
-        $fields = [
-          'tracking_number' => $items['trackingno'],
-          'order_updated' => 1,
-        ];
-      }
-      else {
-        $fields = [
-          'tracking_number' => 'Contact support for assistance',
-          'order_updated' => 1,
-        ];
-      }
+      $fields = [
+        'tracking_number' => $items['trackingno'],
+        'order_updated' => $items['order_updated'],
+      ];
       db_update('corporate_disk_company_shipments')
         ->fields($fields)
         ->condition('order_number', $items['ordernumber'], '=')
         ->execute();
     }
   }
+
   catch (Exception $e) {
     watchdog('corporate_disk_company', '<p>Error processing updates.</p><h2>General Fault</h2><br /><b>Code:</b> @exc', ['@exc' => $e]);
     return FALSE;
