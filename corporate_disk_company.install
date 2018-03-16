@@ -157,7 +157,7 @@ function corporate_disk_company_update_7201() {
   db_change_field(corporate_disk_company_shipments, 'tracking_number', 'tracking_number', [
     'type' => 'varchar',
     'description' => 'Tracking number from disk.com.',
-    'length' => '150',
-    'disp-width' => '150',
+    'length' => '250',
+    'disp-width' => '250',
   ]);
 }
