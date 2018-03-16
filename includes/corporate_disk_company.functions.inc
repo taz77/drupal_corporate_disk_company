@@ -371,6 +371,38 @@ function corporate_disk_company_tracking() {
 
           break;
 
+        case 'unprocessed':
+          $orders_update[] = [
+            'ordernumber' => $value['ordernumber'],
+            'trackingno' => 'Processing. Please check back for updates.',
+            'order_updated' => 0,
+          ];
+          break;
+
+        case 'allocated':
+          $orders_update[] = [
+            'ordernumber' => $value['ordernumber'],
+            'trackingno' => 'Allocated and preparing to ship.',
+            'order_updated' => 0,
+          ];
+          break;
+
+        case 'backorder':
+          $orders_update[] = [
+            'ordernumber' => $value['ordernumber'],
+            'trackingno' => 'Backordered. Please check back for updates.',
+            'order_updated' => 0,
+          ];
+          break;
+
+        case 'exceptions':
+          $orders_update[] = [
+            'ordernumber' => $value['ordernumber'],
+            'trackingno' => 'Problem with your shipment. Contact support.',
+            'order_updated' => 0,
+          ];
+          break;
+
         case 0;
           $orders_update[] = [
             'ordernumber' => $value['ordernumber'],
